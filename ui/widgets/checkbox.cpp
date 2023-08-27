@@ -15,6 +15,8 @@
 #include <QtGui/QtEvents>
 #include <QtCore/QtMath>
 
+#include "ayu/ayu_ui_settings.h"
+
 namespace Ui {
 namespace {
 
@@ -31,6 +33,22 @@ TextParseOptions _checkboxRichOptions = {
 	0, // maxh
 	Qt::LayoutDirectionAuto, // dir
 };
+
+int SwitchShift(not_null<const style::Toggle *> st) {
+	return AyuUiSettings::isMaterialSwitches() ? st->shift : st::defaultToggleShift;
+}
+
+int SwitchDiameter(not_null<const style::Toggle *> st) {
+	return AyuUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
+}
+
+int SwitchDiameter(not_null<const style::Check *> st) {
+	return AyuUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
+}
+
+int SwitchDiameter(not_null<const style::Radio *> st) {
+	return AyuUiSettings::isMaterialSwitches() ? st->diameter : st::defaultToggleDiameter;
+}
 
 } // namespace
 
@@ -53,7 +71,8 @@ void AbstractCheckView::setChecked(bool checked, anim::type animated) {
 			[=] { if (_updateCallback) _updateCallback(); },
 			_checked ? 0. : 1.,
 			_checked ? 1. : 0.,
-			_duration);
+			AyuUiSettings::isMaterialSwitches() ? _duration : st::defaultToggleDuration,
+			AyuUiSettings::isMaterialSwitches() ? anim::easeOutCubic : anim::linear);
 	}
 	checkedChangedHook(animated);
 	if (changed) {
@@ -92,7 +111,7 @@ ToggleView::ToggleView(
 }
 
 QSize ToggleView::getSize() const {
-	return QSize(2 * _st->border + _st->diameter + _st->width, 2 * _st->border + _st->diameter);
+	return QSize(2 * _st->border + SwitchDiameter(_st) + _st->width, 2 * _st->border + SwitchDiameter(_st));
 }
 
 void ToggleView::setStyle(const style::Toggle &st) {
@@ -105,13 +124,19 @@ void ToggleView::paint(QPainter &p, int left, int top, int outerWidth) {
 
 	PainterHighQualityEnabler hq(p);
 	auto toggled = currentAnimationValue();
-	auto fullWidth = _st->diameter + _st->width;
-	auto innerDiameter = _st->diameter - 2 * _st->shift;
+	auto fullWidth = SwitchDiameter(_st) + _st->width;
+	auto innerDiameter = SwitchDiameter(_st) - 2 * SwitchShift(_st);
 	auto innerRadius = float64(innerDiameter) / 2.;
-	auto toggleLeft = left + anim::interpolate(0, fullWidth - _st->diameter, toggled);
-	auto bgRect = style::rtlrect(left + _st->shift, top + _st->shift, fullWidth - 2 * _st->shift, innerDiameter, outerWidth);
-	auto fgRect = style::rtlrect(toggleLeft, top, _st->diameter, _st->diameter, outerWidth);
+	auto toggleLeft = left + anim::interpolate(0, fullWidth - SwitchDiameter(_st), toggled);
+	auto bgRect = style::rtlrect(left + SwitchShift(_st), top + SwitchShift(_st), fullWidth - 2 * SwitchShift(_st), innerDiameter, outerWidth);
+	auto fgRect = style::rtlrect(toggleLeft, top, SwitchDiameter(_st), SwitchDiameter(_st), outerWidth);
 	auto fgBrush = anim::brush(_st->untoggledFg, _st->toggledFg, toggled);
+
+	auto fgRectF = QRectF(fgRect);
+	if (AyuUiSettings::isMaterialSwitches()) {
+		const auto ayuToggleAnim = anim::interpolateToF(_st->animPadding, 0, toggled);
+		fgRectF.setRect(fgRectF.x() + ayuToggleAnim / 2., fgRectF.y() + ayuToggleAnim / 2., fgRectF.width() - ayuToggleAnim, fgRectF.height() - ayuToggleAnim);
+	}
 
 	p.setPen(Qt::NoPen);
 	p.setBrush(fgBrush);
@@ -121,7 +146,7 @@ void ToggleView::paint(QPainter &p, int left, int top, int outerWidth) {
 	pen.setWidth(_st->border);
 	p.setPen(pen);
 	p.setBrush(anim::brush(_st->untoggledBg, _st->toggledBg, toggled));
-	p.drawEllipse(fgRect);
+	p.drawEllipse(fgRectF);
 
 	if (_locked || _st->xsize > 0) {
 		p.setPen(Qt::NoPen);
@@ -143,8 +168,8 @@ void ToggleView::paintXV(QPainter &p, int left, int top, int outerWidth, float64
 	if (toggled < 1) {
 		// Just X or X->V.
 		const auto xSize = 0. + _st->xsize;
-		const auto xLeft = left + (_st->diameter - xSize) / 2.;
-		const auto xTop = top + (_st->diameter - xSize) / 2.;
+		const auto xLeft = left + (SwitchDiameter(_st) - xSize) / 2.;
+		const auto xTop = top + (SwitchDiameter(_st) - xSize) / 2.;
 		QPointF pathX[] = {
 			{ xLeft, xTop + stroke },
 			{ xLeft + stroke, xTop },
@@ -166,7 +191,7 @@ void ToggleView::paintXV(QPainter &p, int left, int top, int outerWidth, float64
 			// X->V.
 			const auto vSize = 0. + _st->vsize;
 			const auto fSize = (xSize + vSize - 2. * stroke);
-			const auto vLeft = left + (_st->diameter - fSize) / 2.;
+			const auto vLeft = left + (SwitchDiameter(_st) - fSize) / 2.;
 			const auto vTop = 0. + xTop + _st->vshift;
 			QPointF pathV[] = {
 				{ vLeft, vTop + xSize - vSize + stroke },
@@ -193,10 +218,10 @@ void ToggleView::paintXV(QPainter &p, int left, int top, int outerWidth, float64
 	} else {
 		// Just V.
 		const auto xSize = 0. + _st->xsize;
-		const auto xTop = top + (_st->diameter - xSize) / 2.;
+		const auto xTop = top + (SwitchDiameter(_st) - xSize) / 2.;
 		const auto vSize = 0. + _st->vsize;
 		const auto fSize = (xSize + vSize - 2. * stroke);
-		const auto vLeft = left + (_st->diameter - (_st->xsize + _st->vsize - 2. * stroke)) / 2.;
+		const auto vLeft = left + (SwitchDiameter(_st) - (_st->xsize + _st->vsize - 2. * stroke)) / 2.;
 		const auto vTop = 0. + xTop + _st->vshift;
 		QPointF pathV[] = {
 			{ vLeft, vTop + xSize - vSize + stroke },
