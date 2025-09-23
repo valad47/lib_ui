@@ -20,6 +20,9 @@
 // AyuGram includes
 #include "ayu/ayu_ui_settings.h"
 
+#if __has_include(<glib.h>)
+#include <glib.h>
+#endif // __has_include(<glib.h>)
 
 void style_InitFontsResource() {
 #ifdef Q_OS_MAC // Use resources from the .app bundle on macOS.
@@ -367,6 +370,18 @@ void StartFonts() {
 
 	for (const auto &file : QDir(u":/gui/fonts/"_q).entryInfoList()) {
 		LoadCustomFont(file.canonicalFilePath());
+	}
+
+	if (!QFontInfo(name).family().trimmed().startsWith(
+			name,
+			Qt::CaseInsensitive)) {
+		const auto text = u"Unable to load '"_q
+			+ name
+			+ u"', expect font metric issues."_q;
+		LOG(("Font Error: %1").arg(text));
+#if __has_include(<glib.h>)
+		g_warning("%s", text.toUtf8().constData());
+#endif //  __has_include(<glib.h>)
 	}
 
 	QFont::insertSubstitution(name, u"Vazirmatn UI NL"_q);
