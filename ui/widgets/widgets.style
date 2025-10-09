@@ -614,6 +614,7 @@ Toast {
 	margin: margins;
 	minWidth: pixels;
 	maxWidth: pixels;
+	radius: pixels;
 	durationFadeIn: int;
 	durationFadeOut: int;
 	durationSlide: int;
@@ -1458,6 +1459,7 @@ defaultToast: Toast {
 	padding: margins(19px, 13px, 19px, 12px);
 	margin: margins(13px, 13px, 13px, 13px);
 	maxWidth: 480px;
+	radius: 6px;
 	durationFadeIn: 200;
 	durationFadeOut: 1000;
 	durationSlide: 160;
@@ -1602,6 +1604,10 @@ menuWithIcons: Menu(defaultMenu) {
 	arrow: menuIconSubmenuArrow;
 }
 menuWithIconsAttention: Menu(menuWithIcons) {
+	itemFg: attentionButtonFg;
+	itemFgOver: attentionButtonFgOver;
+}
+menuAttention: Menu(defaultMenu) {
 	itemFg: attentionButtonFg;
 	itemFgOver: attentionButtonFgOver;
 }
