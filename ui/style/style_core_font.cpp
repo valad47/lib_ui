@@ -24,6 +24,11 @@
 #include <glib.h>
 #endif // __has_include(<glib.h>)
 
+
+// AyuGram includes
+#include "ayu/ayu_ui_settings.h"
+
+
 void style_InitFontsResource() {
 #ifdef Q_OS_MAC // Use resources from the .app bundle on macOS.
 
