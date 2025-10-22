@@ -39,6 +39,10 @@ PRIVATE
     ayu/ayu_ui_settings.cpp
     ayu/ayu_ui_settings.h
 
+    ui/accessible/ui_accessible_factory.cpp
+    ui/accessible/ui_accessible_factory.h
+    ui/accessible/ui_accessible_widget.cpp
+    ui/accessible/ui_accessible_widget.h
     ui/dpr/dpr_icon.cpp
     ui/dpr/dpr_icon.h
     ui/dpr/dpr_image.h

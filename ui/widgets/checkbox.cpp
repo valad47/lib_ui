@@ -554,6 +554,7 @@ Checkbox::Checkbox(
 				_st.style,
 				std::move(value),
 				_checkboxRichOptions);
+			accessibilityNameChanged();
 			resizeToText();
 			if (_text.hasLinks()) {
 				setMouseTracking(true);
@@ -590,6 +591,7 @@ QRect Checkbox::checkRect() const {
 
 void Checkbox::setText(const QString &text, bool rich) {
 	_text.setText(_st.style, text, rich ? _checkboxRichOptions : _checkboxOptions);
+	accessibilityNameChanged();
 	resizeToText();
 	update();
 }
