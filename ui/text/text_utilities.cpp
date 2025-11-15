@@ -106,6 +106,14 @@ TextWithEntities Code(const QString &text) {
     return WithSingleEntity(text, EntityType::Code);
 }
 
+TextWithEntities Underline(const QString &text) {
+	return WithSingleEntity(text, EntityType::Underline);
+}
+
+TextWithEntities StrikeOut(const QString &text) {
+	return WithSingleEntity(text, EntityType::StrikeOut);
+}
+
 TextWithEntities Link(const QString &text, const QString &url) {
 	return WithSingleEntity(text, EntityType::CustomUrl, url);
 }
