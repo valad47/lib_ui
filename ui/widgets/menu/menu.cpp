@@ -47,12 +47,12 @@ void Menu::init() {
 	}
 
 	paintRequest(
-	) | rpl::start_with_next([=](const QRect &clip) {
+	) | rpl::on_next([=](const QRect &clip) {
 		QPainter(this).fillRect(clip, _st.itemBg);
 	}, lifetime());
 
 	positionValue(
-	) | rpl::start_with_next([=] {
+	) | rpl::on_next([=] {
 		handleMouseMove(QCursor::pos());
 	}, lifetime());
 }
@@ -106,7 +106,7 @@ not_null<QAction*> Menu::insertAction(
 	const auto action = raw->action();
 	_actions.insert(begin(_actions) + position, action);
 
-	raw->setParent(this);
+	raw->setMenuAsParent(this);
 	raw->show();
 	raw->setIndex(position);
 	for (auto i = position, to = int(_actionWidgets.size()); i != to; ++i) {
@@ -117,7 +117,7 @@ not_null<QAction*> Menu::insertAction(
 		std::move(widget));
 
 	raw->selects(
-	) | rpl::start_with_next([=](const CallbackData &data) {
+	) | rpl::on_next([=](const CallbackData &data) {
 		if (!data.selected) {
 			if (!findSelectedAction()
 				&& data.index < _actionWidgets.size()
@@ -139,7 +139,7 @@ not_null<QAction*> Menu::insertAction(
 	}, raw->lifetime());
 
 	raw->clicks(
-	) | rpl::start_with_next([=](const CallbackData &data) {
+	) | rpl::on_next([=](const CallbackData &data) {
 		if (_triggeredCallback) {
 			_triggeredCallback(data);
 		}
@@ -157,12 +157,12 @@ not_null<QAction*> Menu::insertAction(
 	raw->minWidthValue(
 	) | rpl::skip(1) | rpl::filter([=] {
 		return !_forceWidth;
-	}) | rpl::start_with_next([=] {
+	}) | rpl::on_next([=] {
 		resizeFromInner(recountWidth(), height());
 	}, raw->lifetime());
 
 	raw->heightValue(
-	) | rpl::skip(1) | rpl::start_with_next([=] {
+	) | rpl::skip(1) | rpl::on_next([=] {
 		resizeFromInner(width(), recountHeight());
 	}, raw->lifetime());
 
@@ -438,10 +438,23 @@ void Menu::handleMousePress(QPoint globalPosition) {
 }
 
 void Menu::handleMouseRelease(QPoint globalPosition) {
+	if (_pressedOutside) {
+		_pressedOutside = false;
+		updateSelected(globalPosition);
+		if (const auto selected = findSelectedAction()) {
+			selected->setClicked(TriggeredSource::Mouse);
+		}
+		return;
+	}
 	if (!rect().contains(mapFromGlobal(globalPosition))
 			&& _mouseReleaseDelegate) {
 		_mouseReleaseDelegate(globalPosition);
 	}
+}
+
+void Menu::handlePressedOutside(QPoint globalPosition) {
+	_pressedOutside = true;
+	updateSelected(globalPosition);
 }
 
 } // namespace Ui::Menu

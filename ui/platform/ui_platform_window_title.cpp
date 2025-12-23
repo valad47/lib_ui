@@ -41,14 +41,14 @@ void SetupSemiNativeSystemButtons(
 	window->systemButtonOver(
 	) | rpl::filter([=](HitTestResult button) {
 		return !filter || filter() || (button == HitTestResult::None);
-	}) | rpl::start_with_next([=](HitTestResult button) {
+	}) | rpl::on_next([=](HitTestResult button) {
 		controls->buttonOver(button);
 	}, lifetime);
 
 	window->systemButtonDown(
 	) | rpl::filter([=](HitTestResult button) {
 		return !filter || filter() || (button == HitTestResult::None);
-	}) | rpl::start_with_next([=](HitTestResult button) {
+	}) | rpl::on_next([=](HitTestResult button) {
 		controls->buttonDown(button);
 	}, lifetime);
 }
@@ -89,7 +89,7 @@ void IconTitleButtons::updateState(
 			? &st.minimizeIconActiveOver
 			: &st.minimize.iconOver;
 		_minimize->setIconOverride(minimize, minimizeOver);
-		_minimize->accessibilitySetName(Ui::Integration::Instance().phraseMinimize());
+		_minimize->setAccessibleName(Ui::Integration::Instance().phraseMinimize());
 	}
 	if (_maximizeRestore) {
 		if (maximized) {
@@ -100,7 +100,7 @@ void IconTitleButtons::updateState(
 				? &st.restoreIconActiveOver
 				: &st.restoreIconOver;
 			_maximizeRestore->setIconOverride(restore, restoreOver);
-			_maximizeRestore->accessibilitySetName(Ui::Integration::Instance().phraseRestore());
+			_maximizeRestore->setAccessibleName(Ui::Integration::Instance().phraseRestore());
 		} else {
 			const auto maximize = active
 				? &st.maximizeIconActive
@@ -109,7 +109,7 @@ void IconTitleButtons::updateState(
 				? &st.maximizeIconActiveOver
 				: &st.maximize.iconOver;
 			_maximizeRestore->setIconOverride(maximize, maximizeOver);
-			_maximizeRestore->accessibilitySetName(Ui::Integration::Instance().phraseMaximize());
+			_maximizeRestore->setAccessibleName(Ui::Integration::Instance().phraseMaximize());
 		}
 	}
 	if (_close) {
@@ -120,7 +120,7 @@ void IconTitleButtons::updateState(
 			? &st.closeIconActiveOver
 			: &st.close.iconOver;
 		_close->setIconOverride(close, closeOver);
-		_close->accessibilitySetName(Ui::Integration::Instance().phraseButtonClose());
+		_close->setAccessibleName(Ui::Integration::Instance().phraseButtonClose());
 	}
 }
 
@@ -152,7 +152,7 @@ TitleControls::TitleControls(
 	init(std::move(maximize));
 
 	_close->paintRequest(
-	) | rpl::start_with_next([=] {
+	) | rpl::on_next([=] {
 		const auto active = window()->isActiveWindow();
 		if (_activeState != active) {
 			_activeState = active;
@@ -231,7 +231,7 @@ void TitleControls::init(Fn<void(bool maximized)> maximize) {
 	rpl::combine(
 		parent()->widthValue(),
 		_layout->value()
-	) | rpl::start_with_next([=] {
+	) | rpl::on_next([=] {
 		updateControlsPosition();
 	}, _close->lifetime());
 
@@ -544,7 +544,7 @@ std::unique_ptr<SeparateTitleControls> SetupSeparateTitleControls(
 		window->body()->widthValue(),
 		window->additionalContentPaddingValue(),
 		controlsTop ? std::move(controlsTop) : rpl::single(0)
-	) | rpl::start_with_next([=](int width, int padding, int top) {
+	) | rpl::on_next([=](int width, int padding, int top) {
 		raw->wrap.setGeometry(
 			0,
 			top,
@@ -553,7 +553,7 @@ std::unique_ptr<SeparateTitleControls> SetupSeparateTitleControls(
 	}, lifetime);
 
 	window->hitTestRequests(
-	) | rpl::start_with_next([=](not_null<HitTestRequest*> request) {
+	) | rpl::on_next([=](not_null<HitTestRequest*> request) {
 		const auto controlsResult = raw->controls.hitTest(request->point);
 		if (controlsResult != HitTestResult::None) {
 			request->result = controlsResult;

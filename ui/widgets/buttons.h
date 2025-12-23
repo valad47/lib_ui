@@ -164,6 +164,7 @@ public:
 	void setBrushOverride(std::optional<QBrush> brush);
 	void setPenOverride(std::optional<QPen> pen);
 	void setTextFgOverride(std::optional<QColor> textFg);
+	void setIconOverride(const style::icon *icon);
 	void finishNumbersAnimation();
 
 	[[nodiscard]] int contentWidth() const;
@@ -202,6 +203,7 @@ private:
 	std::optional<QBrush> _brushOverride;
 	std::optional<QPen> _penOverride;
 	std::optional<QColor> _textFgOverride;
+	const style::icon *_iconOverride = nullptr;
 	RoundRect _roundRect;
 	RoundRect _roundRectOver;
 	Text::MarkedContext _context;
@@ -214,11 +216,6 @@ private:
 class IconButton : public RippleButton {
 public:
 	IconButton(QWidget *parent, const style::IconButton &st);
-
-	QString accessibilityName() override {
-		return _accessibilityName;
-	}
-	void accessibilitySetName(QString name);
 
 	[[nodiscard]] const style::IconButton &st() const;
 
@@ -243,8 +240,6 @@ private:
 	const style::color *_rippleColorOverride = nullptr;
 
 	Ui::Animations::Simple _a_over;
-
-	QString _accessibilityName;
 
 };
 
