@@ -24,6 +24,7 @@
 namespace Ui {
 
 const QString kQEllipsis = u"..."_q;
+const QString kQBullet = QString::fromUtf8("\xE2\x80\xA2");
 
 } // namespace Ui
 
@@ -768,6 +769,24 @@ void String::setSpoilerLinkFilter(Fn<bool(const ClickContext&)> filter) {
 	_extended->spoiler->link = std::make_shared<SpoilerClickHandler>(
 		this,
 		std::move(filter));
+}
+
+bool String::hasCustomEmoji() const {
+	return _hasCustomEmoji;
+}
+
+void String::setCustomEmojiClickHandler(
+		Fn<bool(QStringView)> predicate,
+		Fn<void(QStringView, ClickContext)> callback) {
+	if (!_hasCustomEmoji) {
+		return;
+	}
+	const auto extended = ensureExtended();
+	extended->customEmoji = std::make_unique<CustomEmojiData>();
+	const auto data = extended->customEmoji.get();
+	data->predicate = std::move(predicate);
+	data->callback = std::move(callback);
+	data->link = std::make_shared<CustomEmojiClickHandler>(data);
 }
 
 void String::setBlockquoteExpandCallback(

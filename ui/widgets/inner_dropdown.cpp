@@ -19,7 +19,7 @@ InnerDropdown::InnerDropdown(
 	const style::InnerDropdown &st)
 : RpWidget(parent)
 , _st(st)
-, _roundRect(ImageRoundRadius::Large, _st.bg)
+, _roundRect(st::innerDropdownRadius, _st.bg)
 , _hideTimer([=] { hideAnimated(); })
 , _scroll(this, _st.scroll) {
 	_scroll->scrolls(
@@ -305,7 +305,7 @@ void InnerDropdown::startShowAnimation() {
 		auto inner = rect().marginsRemoved(_st.padding);
 		_showAnimation->setFinalImage(std::move(cache), QRect(inner.topLeft() * pixelRatio, inner.size() * pixelRatio));
 		_showAnimation->setCornerMasks(
-			Images::CornersMask(ImageRoundRadius::Large));
+			Images::CornersMask(st::innerDropdownRadius));
 		_showAnimation->start();
 	}
 	hideChildren();
