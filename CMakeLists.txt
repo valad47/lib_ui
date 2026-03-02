@@ -41,6 +41,8 @@ PRIVATE
 
     ui/accessible/ui_accessible_factory.cpp
     ui/accessible/ui_accessible_factory.h
+    ui/accessible/ui_accessible_item.cpp
+    ui/accessible/ui_accessible_item.h
     ui/accessible/ui_accessible_widget.cpp
     ui/accessible/ui_accessible_widget.h
     ui/dpr/dpr_icon.cpp
