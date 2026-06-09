@@ -447,6 +447,9 @@ FontData::FontData(const FontResolveResult &result, FontVariants *modified)
 	descent = height - ascent;
 	spacew = width(QLatin1Char(' '));
 	elidew = width(u"..."_q);
+
+	fascent = QFixed::fromReal(result.ascent);
+	fleading = QFixed::fromReal(_m.leading());
 }
 
 Font FontData::bold(bool set) const {
@@ -488,7 +491,7 @@ int FontData::family() const {
 Font FontData::otherFlagsFont(FontFlag flag, bool set) const {
 	const auto newFlags = !set
 		? (_flags & ~flag)
-		: (flag == FontFlag::Monospace)
+		: ((_flags | flag) & FontFlag::Monospace)
 		? FontFlag::Monospace
 		: (_flags | flag);
 	if (!_modified[newFlags]) {
